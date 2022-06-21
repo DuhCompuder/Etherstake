@@ -3,6 +3,7 @@
 pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./RewardToken.sol";
 
 contract Farm {
     // userAddress => stakingBalance
@@ -16,25 +17,25 @@ contract Farm {
 
     string public name = "TokenFarm";
 
-    IERC20 public daiToken;
-    IERC20 public testToken;
+    RewardsToken public rewardsToken;
+    IERC20 public stakeToken;
 
     event Stake(address indexed from, uint256 amount);
     event Unstake(address indexed from, uint256 amount);
     event YieldWithdraw(address indexed to, uint256 amount);
 
     constructor(
-        IERC20 _daiToken,
-        IERC20 _testToken
+        RewardsToken _rewardsToken,
+        IERC20 _stakeToken
     ) {
-        daiToken = _daiToken;
-        testToken = _testToken;
+        rewardsToken = _rewardsToken;
+        stakeToken = _stakeToken;
     }
     //CORE FUNCTIONS
     function stake(uint256 amount) public {
         require(
             amount > 0 &&
-            daiToken.balanceOf(msg.sender) >= amount,
+            stakeToken.balanceOf(msg.sender) >= amount,
             "You cannot stake zero tokens");
 
         if(isStaking[msg.sender] == true){
@@ -42,7 +43,7 @@ contract Farm {
             tokenBalance[msg.sender] += toTransfer;
         }
 
-        daiToken.transferFrom(msg.sender, address(this), amount);
+        stakeToken.transferFrom(msg.sender, address(this), amount);
         stakingBalance[msg.sender] += amount;
         startTime[msg.sender] = block.timestamp;
         isStaking[msg.sender] = true;
@@ -60,7 +61,7 @@ contract Farm {
         uint256 balanceTransfer = amount;
         amount = 0;
         stakingBalance[msg.sender] -= balanceTransfer;
-        daiToken.transfer(msg.sender, balanceTransfer);
+        stakeToken.transfer(msg.sender, balanceTransfer);
         tokenBalance[msg.sender] += yieldTransfer;
         if(stakingBalance[msg.sender] == 0){
             isStaking[msg.sender] = false;
@@ -84,7 +85,7 @@ contract Farm {
         }
 
         startTime[msg.sender] = block.timestamp;
-        testToken.mint(msg.sender, toTransfer);
+        rewardsToken.mint(msg.sender, toTransfer);
         emit YieldWithdraw(msg.sender, toTransfer);
     }
 
