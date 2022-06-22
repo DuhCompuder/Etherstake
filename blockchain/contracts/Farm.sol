@@ -18,24 +18,22 @@ contract Farm {
     string public name = "TokenFarm";
 
     RewardsToken public rewardsToken;
-    IERC20 public stakeToken;
 
     event Stake(address indexed from, uint256 amount);
     event Unstake(address indexed from, uint256 amount);
     event YieldWithdraw(address indexed to, uint256 amount);
 
-    constructor(
-        RewardsToken _rewardsToken,
-        IERC20 _stakeToken
-    ) {
+    receive() external payable {}
+
+    constructor (
+        RewardsToken _rewardsToken
+    ) payable {
         rewardsToken = _rewardsToken;
-        stakeToken = _stakeToken;
     }
     //CORE FUNCTIONS
-    function stake(uint256 amount) public {
+    function stake() public payable {
         require(
-            amount > 0 &&
-            stakeToken.balanceOf(msg.sender) >= amount,
+            msg.value > 0,
             "You cannot stake zero tokens");
 
         if(isStaking[msg.sender] == true){
@@ -43,25 +41,24 @@ contract Farm {
             tokenBalance[msg.sender] += toTransfer;
         }
 
-        stakeToken.transferFrom(msg.sender, address(this), amount);
-        stakingBalance[msg.sender] += amount;
+        stakingBalance[msg.sender] += msg.value;
         startTime[msg.sender] = block.timestamp;
         isStaking[msg.sender] = true;
-        emit Stake(msg.sender, amount);
+        emit Stake(msg.sender, msg.value);
     }
 
-    function unstake(uint256 amount) public {
+    function unstake(uint256 amount, address payable _to) public payable {
         require(
             isStaking[msg.sender] = true && 
             stakingBalance[msg.sender] >= amount,
             "Nothing to unstake"
         );
         uint256 yieldTransfer = calculateYieldTotal(msg.sender);
-        startTime[msg.sender] = block.timestamp; // bug fix
+        startTime[msg.sender] = block.timestamp;
         uint256 balanceTransfer = amount;
         amount = 0;
         stakingBalance[msg.sender] -= balanceTransfer;
-        stakeToken.transfer(msg.sender, balanceTransfer);
+        _to.transfer(balanceTransfer);
         tokenBalance[msg.sender] += yieldTransfer;
         if(stakingBalance[msg.sender] == 0){
             isStaking[msg.sender] = false;
