@@ -5,6 +5,8 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract RewardsToken is ERC20, Ownable {
+
+    event TransferedOwner(address indexed newOwner);
     constructor() ERC20("RewardsToken", "RWT") {}
 
     function mint(address to, uint256 amount) public onlyOwner {
@@ -13,5 +15,6 @@ contract RewardsToken is ERC20, Ownable {
 
     function transferOwnership(address newOwner) public override onlyOwner {
         _transferOwnership(newOwner);
+        emit TransferedOwner(newOwner);
     }
 }
