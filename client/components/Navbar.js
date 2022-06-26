@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { HiMenuAlt4 } from "react-icons/hi";
 import { AiOutlineClose } from "react-icons/ai";
+import { TransactionContext, TransactionProvider, getEthereumContract } from '../context/TransactionContext'
 
 function Navbar() {
   const [toggleMenu, setToggleMenu] = useState(false);
+  const { connectWallet, connectedAccount } = useContext(TransactionContext);
 
   const NavBarItem = ({ title, classprops }) => (
   <li className={`mx-4 cursor-pointer ${classprops}`}>{title}</li>
@@ -17,9 +19,21 @@ function Navbar() {
               {["Market", "Exchange", "Tutorials", "Wallets"].map((item, index) => (
               <NavBarItem key={item + index} title={item} />
               ))}
-              <li className="bg-yellow-500 py-2 px-7 mx-4 rounded-full cursor-pointer hover:bg-orange-600">
-                Login
+              {!connectedAccount && (
+                <li className="bg-yellow-500 py-2 px-7 mx-4 rounded-full cursor-pointer hover:bg-orange-600">
+                <button onClick={() => connectWallet()}>
+                  <h3>Login</h3>
+                </button>
               </li>
+              )}
+              {connectedAccount && (
+                <li className="bg-yellow-500 py-2 px-7 mx-4 rounded-full cursor-pointer hover:bg-orange-600">
+                
+                  <h3>{`Connected: ${(connectedAccount).slice(0,5)}......${(connectedAccount).slice(-5)}`}</h3>
+           
+              </li>
+              )}
+              
             </ul>
             <div className="flex relative">
             {!toggleMenu && (
