@@ -46,6 +46,12 @@ export const TransactionProvider = ({ children }) => {
             console.log(error)
         }
     }
+
+    // const checkIfWalletChanged = async () => {
+    //     ethereum.on('accountsChanged', function (accounts) {
+    //         getAccount();
+    //     })
+    // }
     
     useEffect(() =>{
         checkIfWalletConnected()

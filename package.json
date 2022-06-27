@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/DuhCompuder/Etherstake/issues"
   },
-  "homepage": "https://github.com/DuhCompuder/Etherstake#readme"
+  "homepage": "https://github.com/DuhCompuder/Etherstake#readme",
+  "dependencies": {
+    "ethers": "^5.6.9"
+  }
 }

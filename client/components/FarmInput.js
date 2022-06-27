@@ -1,27 +1,44 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { TransactionContext, TransactionProvider, getEthereumContract } from '../context/TransactionContext'
+import { ethers } from 'ethers'
 
 function FarmInput() {
     const [formInput, updateFormInput] = useState({ amount: 0, timelock: 0 })
     const { getEthereumContract } = useContext(TransactionContext);
+    const [timelock, setTimelock] = useState("0")
+    const [amount, setAmount] = useState("0")
 
     async function stakeEth() {
         const { amount, timelocked } = formInput
-        {/* for test purposes AUDIO file in Metadata: remove audioFileUrl if tests unsuccessful */}
-        // removed audioFileURL due to inability to upload. After removal, upload process continued smoothly with both audio and graphic NFT's. (|| !audioFileURL) 
-        if ( !amount || !timelocked ) return 
+        if ( !amount || !timelocked ) alert('Please enter a value to stake') 
         
         if ( !(amount > 0) ) alert('Please enter an amount more than zero') 
         if ( !(timelocked > 0) ) alert('Please select the amount of time to lock tokens') 
 
+        
         try {
-          const contract = getEthereumContract('farm')
-          await contract.stake({ value: amount });
+          const contract = await getEthereumContract('farm')
+          const transaction = await contract.stake({ value: ethers.utils.parseUnits(amount, 'ether') });
+          await transaction.wait()
+          console.log(transaction)
         } catch (error) {
           console.log('Error staking: ', error)
         }  
+        setTimelock(0)
+        setAmount(0)
     }
 
+    const handleAmount = (event) => {
+        const value = event.target.value;
+        setAmount(value);
+        updateFormInput({ ...formInput, amount: value })
+    };
+
+    const handleTimelock = (event) => {
+        const value = event.target.value;
+        setTimelock(value);
+        updateFormInput({ ...formInput, amount: value })
+    };
     return (
         <div className="bg-yellow-400 border-2 border-yellow-700 w-full flex justify-evenly items-center p-4">
             <h1 className="font-bold text-xl">
@@ -35,9 +52,10 @@ function FarmInput() {
                 <input
                 className="h-10 w-20 p-2"
                 name="Ether"
-                placeholder="0.0"
+                placeholder="0"
+                value={timelock}
                 type="number"
-                onChange={e => updateFormInput({ ...formInput, timelocked: e.target.value })} />
+                onChange={handleTimelock} />
                 
                 </div>
             </div>
@@ -49,9 +67,10 @@ function FarmInput() {
                 <input
                 className="p-2 w-20"
                 name="Ether"
-                placeholder="0.0"
+                placeholder="0"
+                value={amount}
                 type="number"
-                onChange={e => updateFormInput({ ...formInput, amount: e.target.value })}
+                onChange={handleAmount}
                  />
                 <button className="text-white cursor-pointer bg-yellow-800 hover:bg-[#0086D4] p-2 "
                 onClick={()=>stakeEth()}
